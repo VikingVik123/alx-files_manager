@@ -1,5 +1,4 @@
 const { MongoClient } = require('mongodb');
-import { promisify } from 'util';
 
 class DBClient {
     constructor() {
@@ -8,17 +7,37 @@ class DBClient {
         const database = 'files_manager';
         const url = `mongodb://${host}:${port}/${database}`;
         this.client = new MongoClient(url, { useUnifiedTopology: true });
-        this.client.connect()
+
+        this.client.connect().catch(err => {
+            console.error('Failed to connect to MongoDB:', err);
+        });
     }
 
-    isAlive() {
-        this.client.topology.isConnected();
+    async isAlive() {
+        try {
+            return this.client.topology.isConnected();
+        } catch (err) {
+            console.error('Error checking if the database is alive:', err);
+            return false;
+        }
     }
+
     async nbUsers() {
-        return this.client.db().collection('users').countDocuments();
+        try {
+            return await this.client.db().collection('users').countDocuments();
+        } catch (err) {
+            console.error('Error counting users:', err);
+            return 0;
+        }
     }
+
     async nbFiles() {
-        return this.client.db().collection('files').countDocuments();
+        try {
+            return await this.client.db().collection('files').countDocuments();
+        } catch (err) {
+            console.error('Error counting files:', err);
+            return 0;
+        }
     }
 }
 
