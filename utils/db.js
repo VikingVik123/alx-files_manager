@@ -1,17 +1,14 @@
 const { MongoClient } = require('mongodb');
+import { promisify } from 'util';
 
 class DBClient {
     constructor() {
         const host = 'localhost';
         const port = 27017;
         const database = 'files_manager';
-        const url = `mongodb://${host}:${port}`;
+        const url = `mongodb://${host}:${port}/${database}`;
         this.client = new MongoClient(url, { useUnifiedTopology: true });
-        this.client.connect().catch((err) => {
-            console.error('Failed to connect to MongoDB:', err);
-        });
-        this.database = this.client.db(database);
-        
+        this.client.connect()
     }
 
     isAlive() {
