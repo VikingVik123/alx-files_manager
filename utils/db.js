@@ -7,15 +7,14 @@ class DBClient {
         const database = 'files_manager';
         const url = `mongodb://${host}:${port}`;
         this.client = new MongoClient(url, { useUnifiedTopology: true });
-        this.client.connect().catch((err) => {
+        this.database = null;
+        this.connect(database).catch((err) => {
             console.error('Failed to connect to MongoDB:', err);
         });
-        this.database = this.client.db(database);
-        
     }
 
     isAlive() {
-        return this.client.isConnected();
+        return this.client && this.client.topology && this.client.topology.isConnected();
     }
     async nbUsers() {
         return this.client.db().collection('users').countDocuments();
