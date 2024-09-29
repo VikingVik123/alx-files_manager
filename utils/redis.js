@@ -3,7 +3,7 @@ import { createClient } from 'redis';
 class RedisClient {
   constructor() {
     this.client = createClient();
-    this.isClientConnected = false;
+    this.isClientConnected = true;
     this.client.on('error', (err) => {
       console.error(err.message || err.toString());
       this.isClientConnected = false;
