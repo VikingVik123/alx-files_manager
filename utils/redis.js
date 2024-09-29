@@ -1,4 +1,5 @@
 import { createClient } from 'redis';
+import { promisify } from 'util';
 
 class RedisClient {
   constructor() {
@@ -20,32 +21,16 @@ class RedisClient {
   }
 
   async get(key) {
-    try {
-      const value = await this.client.get(key);
-      return value;
-    } catch (error) {
-      console.error(`Error getting key ${key}:`, error);
-      return null;
-    }
+    return promisify(this.client.GET).bind(this.client)(key);
   }
 
   async set(key, value, duration) {
-    try {
-      await this.client.set(key, value);
-      if (duration) {
-        await this.client.expire(key, duration);
-      }
-    } catch (error) {
-      console.error(`Error setting key ${key}:`, error);
-    }
+    await promisify(this.client.SETEX)
+      .bind(this.client)(key, duration, value);
   }
 
   async del(key) {
-    try {
-      await this.client.del(key);
-    } catch (error) {
-      console.error(`Error deleting key ${key}:`, error);
-    }
+    await promisify(this.client.DEL).bind(this.client)(key);
   }
 }
 
