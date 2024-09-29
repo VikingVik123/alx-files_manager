@@ -24,7 +24,7 @@ class DBClient {
 
     async nbUsers() {
         try {
-            return await this.client.db().collection('users').countDocuments();
+            return this.client.db().collection('users').countDocuments();
         } catch (err) {
             console.error('Error counting users:', err);
             return 0;
@@ -33,7 +33,7 @@ class DBClient {
 
     async nbFiles() {
         try {
-            return await this.client.db().collection('files').countDocuments();
+            return this.client.db().collection('files').countDocuments();
         } catch (err) {
             console.error('Error counting files:', err);
             return 0;
