@@ -18,9 +18,15 @@ class DBClient {
         return this.client.isConnected();
     }
     async nbUsers() {
+        if (!this.database) {
+            throw new Error('Database not initialized. Ensure the client is connected.');
+        }
         return this.client.db().collection('users').countDocuments();
     }
     async nbFiles() {
+        if (!this.database) {
+            throw new Error('Database not initialized. Ensure the client is connected.');
+        }
         return this.client.db().collection('files').countDocuments();
     }
 }
