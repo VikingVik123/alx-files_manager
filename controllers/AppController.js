@@ -13,7 +13,7 @@ export default class AppController {
     }
 
     static getStats(req, res) {
-      Promise.all([dbUtils.nbUsers(), dbUtils.nbFiles()])
+      Promise.all([DBClient.nbUsers(), DBClient.nbFiles()])
         .then(([usersCount, filesCount]) => {
           res.status(200).json({ users: usersCount, files: filesCount });
         })
