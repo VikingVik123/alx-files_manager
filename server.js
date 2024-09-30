@@ -1,5 +1,5 @@
 import bodyParser from 'body-parser';
-import routes from './routes';
+
 const express = require('express');
 
 const app = express();
