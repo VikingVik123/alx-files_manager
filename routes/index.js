@@ -1,7 +1,9 @@
 const express = require('express');
 const router = express.Router();
 import AppController from '../controllers/AppController';
+import UsersController from '../controllers/UsersController';
 
 router.get('/status', AppController.getStatus);
 router.get('/stats', AppController.getStats);
+router.post('/user', UsersController.postNew);
 module.exports = router;
