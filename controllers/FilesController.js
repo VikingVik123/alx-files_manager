@@ -117,4 +117,59 @@ export default class FilesController {
       return res.status(500).json({ error: 'Internal server error' });
     }
   }
+  // New method to retrieve a file by ID
+  static async getShow(req, res) {
+    const token = req.headers['x-token'];
+    const fileId = req.params.id;
+
+    // Step 1: Retrieve the user based on the token
+    if (!token) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const userId = await redisClient.get(`auth_${token}`);
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    // Step 2: Retrieve the file document
+    const file = await dbClient.db.collection('files').findOne({
+      _id: new ObjectId(fileId),
+      userId: new ObjectId(userId),
+    });
+
+    if (!file) {
+      return res.status(404).json({ error: 'Not found' });
+    }
+
+    return res.status(200).json(file);
+  }
+
+  // New method to retrieve files with pagination
+  static async getIndex(req, res) {
+    const token = req.headers['x-token'];
+    const parentId = parseInt(req.query.parentId) || 0;
+    const page = parseInt(req.query.page) || 0;
+
+    // Step 1: Retrieve the user based on the token
+    if (!token) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const userId = await redisClient.get(`auth_${token}`);
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    // Step 2: Retrieve files for the specific parentId and paginate
+    const limit = 20;
+    const skip = page * limit;
+
+    const files = await dbClient.db.collection('files').find({
+      userId: new ObjectId(userId),
+      parentId: parentId,
+    }).skip(skip).limit(limit).toArray();
+
+    return res.status(200).json(files);
+  }
 }
