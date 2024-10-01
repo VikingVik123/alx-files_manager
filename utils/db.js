@@ -1,21 +1,18 @@
-const { MongoClient } = require('mongodb');
+import { MongoClient } from 'mongodb';
+import { promisify } from 'util';
 
 class DBClient {
   constructor() {
-    const host = 'localhost';
-    const port = 27017;
-    const database = 'files_manager';
-    const url = `mongodb://${host}:${port}/${database}`;
-    
-    this.client = new MongoClient(url, { useUnifiedTopology: true });
-    this.db = null;
+    const uri = process.env.MONGO_URI || 'mongodb://localhost:27017/files_manager';
+    this.client = new MongoClient(uri, { useUnifiedTopology: true });
     this.client.connect()
-      .then(() => {
-        this.db = this.client.db(database);
+      .then((client) => {
+        this.db = client.db(process.env.DB_NAME || 'files_manager');
         console.log('Connected to MongoDB');
       })
       .catch((err) => {
-        console.error('Failed to connect to MongoDB:', err);
+        console.error('Error connecting to MongoDB:', err);
+        this.db = null;
       });
   }
 
@@ -23,16 +20,10 @@ class DBClient {
     return !!this.db;
   }
 
-  async nbUsers() {
-    if (!this.db) return 0;
-    return this.db.collection('users').countDocuments();
-  }
-
-  async nbFiles() {
-    if (!this.db) return 0;
-    return this.db.collection('files').countDocuments();
+  async collection(name) {
+    return this.db.collection(name);
   }
 }
 
-export const dbClient = new DBClient();
+const dbClient = new DBClient();
 export default dbClient;
