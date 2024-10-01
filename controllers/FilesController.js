@@ -172,4 +172,67 @@ export default class FilesController {
 
     return res.status(200).json(files);
   }
+  // Method to publish a file (set isPublic to true)
+  static async putPublish(req, res) {
+    const token = req.headers['x-token'];
+    const fileId = req.params.id;
+    
+    // Step 1: Retrieve the user based on the token
+    if (!token) {
+        return res.status(401).json({ error: 'Unauthorized' });
+    }
+    const userId = await redisClient.get(`auth_${token}`);
+    if (!userId) {
+        return res.status(401).json({ error: 'Unauthorized' });
+    }
+    // Step 2: Find the file document based on the ID and userId
+    const file = await dbClient.db.collection('files').findOne({
+        _id: new ObjectId(fileId),
+        userId: new ObjectId(userId),
+    });
+    if (!file) {
+        return res.status(404).json({ error: 'Not found' });
+    }
+    // Step 3: Update isPublic to true
+    await dbClient.db.collection('files').updateOne(
+        { _id: new ObjectId(fileId) },
+        { $set: { isPublic: true } }
+    );
+    // Return the updated file document
+    const updatedFile = await dbClient.db.collection('files').findOne({
+        _id: new ObjectId(fileId),
+    });
+    return res.status(200).json(updatedFile);
+    }
+    // Method to unpublish a file (set isPublic to false)
+    static async putUnpublish(req, res) {
+    const token = req.headers['x-token'];
+    const fileId = req.params.id;
+    // Step 1: Retrieve the user based on the token
+    if (!token) {
+        return res.status(401).json({ error: 'Unauthorized' });
+    }
+    const userId = await redisClient.get(`auth_${token}`);
+    if (!userId) {
+        return res.status(401).json({ error: 'Unauthorized' });
+    }
+    // Step 2: Find the file document based on the ID and userId
+    const file = await dbClient.db.collection('files').findOne({
+        _id: new ObjectId(fileId),
+        userId: new ObjectId(userId),
+    });
+    if (!file) {
+        return res.status(404).json({ error: 'Not found' });
+    }
+    // Step 3: Update isPublic to false
+    await dbClient.db.collection('files').updateOne(
+        { _id: new ObjectId(fileId) },
+        { $set: { isPublic: false } }
+    );
+    // Return the updated file document
+    const updatedFile = await dbClient.db.collection('files').findOne({
+        _id: new ObjectId(fileId),
+    });    
+    return res.status(200).json(updatedFile);
+    }
 }
